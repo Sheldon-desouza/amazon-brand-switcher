@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Seller Central Brand Switcher</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container" id="main-content">
+    
+    <div class="tabs">
+      <button class="tab-btn active" data-target="page-view">Save Page</button>
+      <button class="tab-btn" data-target="client-view">Save Brand</button>
+    </div>
+
+    <!-- SAVE PAGE VIEW -->
+    <div id="page-view" class="view-section active">
+      <div class="header">
+        <p>Assign a shortcut to quickly return to this exact page.</p>
+      </div>
+      
+      <div class="form-group">
+        <label>Page Name:</label>
+        <input type="text" id="page-name" placeholder="e.g. Manage Inventory">
+      </div>
+
+      <div class="form-group">
+        <label>Keyboard Shortcut:</label>
+        <div class="shortcut-input-group">
+          <input type="text" id="page-shortcut-input" class="shortcut-input" placeholder="Type a shortcut..." readonly>
+        </div>
+      </div>
+
+      <button id="save-page-btn" class="save-btn">Save Page Shortcut</button>
+      <div id="page-status" class="status hidden">✅ Saved!</div>
+    </div>
+
+    <!-- SAVE BRAND VIEW -->
+    <div id="client-view" class="view-section">
+      <div class="header">
+        <p>Assign a shortcut to quickly switch to the active brand account.</p>
+      </div>
+      
+      <div class="form-group">
+        <label>Detected Brand:</label>
+        <input type="text" id="client-name" readonly style="background-color: #eee;">
+      </div>
+
+      <div class="form-group">
+        <label>Keyboard Shortcut:</label>
+        <div class="shortcut-input-group">
+          <input type="text" id="client-shortcut-input" class="shortcut-input" placeholder="Type a shortcut..." readonly>
+        </div>
+      </div>
+
+      <button id="save-client-btn" class="save-btn">Save Brand Shortcut</button>
+      <div id="client-status" class="status hidden">✅ Saved!</div>
+    </div>
+
+  </div>
+
+  <div class="container hidden" id="error-content">
+    <div class="header" style="border:none;">
+      <h2 style="margin-bottom:10px;">Seller Central Brand Switcher</h2>
+      <p>This extension only works on Amazon Seller Central pages.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="#" id="open-settings">⚙️ Open Full Settings</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

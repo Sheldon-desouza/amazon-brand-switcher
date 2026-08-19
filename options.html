@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Seller Central Brand Switcher — Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Seller Central Brand Switcher</h1>
+      <p>Keyboard shortcut tool for Amazon Seller Central.</p>
+    </header>
+
+    <main>
+      <section id="behaviour-section">
+        <h2>Behaviour</h2>
+        <div class="toggle-row">
+          <label class="toggle-label" for="stay-on-page-toggle">
+            <span class="toggle-title">Stay on current page when switching clients</span>
+            <span class="toggle-desc">When enabled, switching to a different brand account keeps you on the same page (e.g. /inventory) instead of going to the Seller Central home page.</span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="stay-on-page-toggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <hr>
+
+      <section id="brands-section">
+        <h2>Brand Shortcuts</h2>
+        <p class="description">
+          Add the <strong>exact name</strong> of the brand as it appears in the Seller Central dropdown (e.g., "Ellie Charles Ltd", "Dyson").
+        </p>
+        
+        <table id="brands-table">
+          <thead>
+            <tr>
+              <th style="width: 30px;"></th>
+              <th>Brand Name</th>
+              <th>Shortcut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clients-body">
+            <!-- Client rows will be injected here -->
+          </tbody>
+        </table>
+      </section>
+
+      <hr>
+
+      <section id="pages-section">
+        <h2>Page Navigation Shortcuts</h2>
+        <p class="description">Quickly jump to frequently used pages.</p>
+        
+        <table id="pages-table">
+          <thead>
+            <tr>
+              <th style="width: 30px;"></th>
+              <th>Page</th>
+              <th>Shortcut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pages-body">
+            <!-- Page shortcut rows will be injected here -->
+          </tbody>
+        </table>
+      </section>
+
+      <div class="save-container">
+        <button id="save-btn" class="success-btn">Save Settings</button>
+        <span id="save-status" class="status-msg hidden">Saved!</span>
+      </div>
+    </main>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>

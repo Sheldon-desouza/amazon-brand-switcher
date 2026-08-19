@@ -1,0 +1,276 @@
+:root {
+  --primary: #232f3e; /* Amazon dark blue */
+  --secondary: #ff9900; /* Amazon orange */
+  --bg: #f3f3f3;
+  --text: #0f1111;
+  --border: #d5d9d9;
+  --success: #007600;
+  --danger: #cc0c39;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+header {
+  border-bottom: 2px solid var(--secondary);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+}
+
+h1 {
+  margin: 0 0 10px 0;
+  color: var(--primary);
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin-top: 0;
+}
+
+.description {
+  color: #565959;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  background-color: #f7f8f8;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+input.shortcut-key {
+  width: 60px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+select {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+}
+
+button {
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.primary-btn {
+  background-color: white;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.primary-btn:hover {
+  background-color: #f7f8f8;
+}
+
+.success-btn {
+  background-color: #ffd814;
+  border-color: #fcd200;
+  color: var(--text);
+  padding: 10px 24px;
+  font-size: 16px;
+}
+
+.success-btn:hover {
+  background-color: #f7ca00;
+  border-color: #f2c200;
+}
+
+.delete-btn {
+  background-color: transparent;
+  color: var(--danger);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.delete-btn:hover {
+  text-decoration: underline;
+}
+
+.save-container {
+  margin-top: 30px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 30px 0;
+}
+
+.status-msg {
+  color: var(--success);
+  font-weight: bold;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Drag and Drop Styles */
+.drag-handle {
+  cursor: grab;
+  color: #888;
+  user-select: none;
+  font-size: 16px;
+  text-align: center;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.draggable-row.dragging {
+  opacity: 0.5;
+  background-color: #f3f3f3;
+}
+
+.draggable-row.drag-over {
+  border-top: 2px solid #ff9900;
+}
+
+/* ---- Behaviour Toggle ---- */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 0;
+}
+
+.toggle-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.toggle-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.toggle-desc {
+  font-size: 0.82rem;
+  color: #565959;
+  line-height: 1.4;
+}
+
+/* Pill toggle switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background-color: #ccc;
+  border-radius: 26px;
+  transition: background-color 0.2s;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--secondary);
+}
+
+.toggle-switch input:focus-visible + .toggle-slider {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+}
+
+/* ---- Cross-table drop zone highlight ---- */
+section.drop-zone-active {
+  outline: 2px dashed var(--secondary);
+  outline-offset: 6px;
+  border-radius: 6px;
+  background-color: #fffbf2;
+  transition: background-color 0.15s;
+}
+
+section.drop-zone-active h2::after {
+  content: ' ↓ Drop here to convert';
+  font-size: 0.75rem;
+  font-weight: normal;
+  color: var(--secondary);
+  margin-left: 8px;
+}
+
+
