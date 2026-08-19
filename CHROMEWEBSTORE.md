@@ -146,7 +146,7 @@ CONTACT: [YOUR EMAIL]
 
 ## Developer Info
 
-**Publisher Name**: [YOUR NAME OR COMPANY — e.g. Rufusly]  
+**Publisher Name**: [YOUR NAME OR COMPANY — e.g. Your Company Name]  
 **Contact Email**: [YOUR EMAIL — shown publicly]  
 **Support URL**: [GitHub Issues or email]  
 **Homepage URL**: [Optional]  
@@ -179,7 +179,7 @@ CONTACT: [YOUR EMAIL]
 Run from the parent directory:
 
 ```bash
-cd /Users/sheldon/Rufusly
+cd ~/your-projects-folder
 zip -r seller-central-brand-switcher-v1.2.0.zip amazon-client-switcher/ \
   --exclude "amazon-client-switcher/.git/*" \
   --exclude "amazon-client-switcher/generate_icons.py" \

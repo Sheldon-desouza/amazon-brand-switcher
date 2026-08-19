@@ -1,0 +1,19 @@
+# .gitignore for Amazon Brand Switcher Chrome Extension
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Internal task and planning files
+task.md
+implementation_plan.md
+walkthrough.md
+
+# Dev / scratch files
+scratch/
+*.log
+
+# Editor folders
+.vscode/
+.idea/
