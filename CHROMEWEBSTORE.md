@@ -170,7 +170,8 @@ CONTACT: [YOUR EMAIL]
 
 | Version | Date | Changes | Status |
 |---------|------|---------|--------|
-| 1.2.0 | 2026-08-13 | Stay-on-page toggle, auto-confirm account switcher, cross-table DnD, icons added | Draft |
+| 1.2.0 | 2026-08-20 | Replaced raw marketplace domains with "Supports all 20 Amazon marketplaces worldwide" in description to fix CWS Keyword Spam rejection. | Draft |
+| 1.2.0 | 2026-08-13 | Stay-on-page toggle, auto-confirm account switcher, cross-table DnD, icons added | Rejected (Keyword Spam) |
 
 ---
 
