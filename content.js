@@ -129,23 +129,35 @@ async function autoConfirmAccountSwitcher() {
   const brandSearch       = parts[0].trim().toLowerCase();
   const marketplaceSearch = (parts[1] || '').trim().toLowerCase();
 
-  // Collect all visible, short-text candidate elements from the account list
-  const candidates = Array.from(document.querySelectorAll(
-    'li, [role="radio"], [role="option"], [role="row"], ' +
-    '[class*="account"], [class*="merchant"], [class*="item"]'
-  )).filter(el => {
-    const t = el.textContent.trim();
-    return t.length > 2 && t.length < 120;
+  // Collect all leaf elements that contain text
+  const candidates = Array.from(document.querySelectorAll('div, span, a, label, li, button')).filter(el => {
+    return el.children.length === 0 && el.textContent.trim().length > 0;
   });
 
   let bestMatch = null;
   let bestScore = -1;
 
   for (const el of candidates) {
-    const text = el.textContent.toLowerCase();
+    const text = el.textContent.trim().toLowerCase();
     let score = 0;
-    if (brandSearch       && text.includes(brandSearch))       score += 3;
-    if (marketplaceSearch && text.includes(marketplaceSearch)) score += 2;
+    
+    if (marketplaceSearch) {
+      if (text === marketplaceSearch) score += 10;
+      else if (text.includes(marketplaceSearch)) score += 5;
+    } else if (brandSearch) {
+      if (text === brandSearch) score += 10;
+      else if (text.includes(brandSearch)) score += 5;
+    }
+
+    // Check if a nearby parent container includes the brand name to disambiguate
+    const parentContainer = el.closest('li, [role="row"], [role="group"], ul, .a-box');
+    if (parentContainer) {
+      const parentText = parentContainer.textContent.toLowerCase();
+      if (brandSearch && parentText.includes(brandSearch)) {
+        score += 2;
+      }
+    }
+
     if (score > bestScore) {
       bestScore = score;
       bestMatch = el;
@@ -153,9 +165,11 @@ async function autoConfirmAccountSwitcher() {
   }
 
   if (bestMatch && bestScore > 0) {
-    console.log('[SC Brand Switcher] Auto-clicking account:', bestMatch.textContent.trim());
-    bestMatch.click();
-    await new Promise(r => setTimeout(r, 500));
+    // Find the closest clickable container (radio button, list item, label, or the element itself)
+    const clickable = bestMatch.closest('input[type="radio"], [role="radio"], li, label, button, a') || bestMatch;
+    console.log('[SC Brand Switcher] Auto-clicking account element:', clickable);
+    clickable.click();
+    await new Promise(r => setTimeout(r, 800)); // wait for React state update to enable button
   } else {
     console.warn('[SC Brand Switcher] No account match found — user must select manually.');
     return; // Don’t blindly click "Select account" if we didn’t match anything
