@@ -176,12 +176,20 @@ async function autoConfirmAccountSwitcher() {
   }
 
   // Click the "Select account" button
-  const selectBtn = Array.from(document.querySelectorAll('button, input[type="submit"], a'))
-    .find(b => /select account/i.test(b.textContent + (b.value || '')));
+  const selectBtn = Array.from(document.querySelectorAll('button, input[type="submit"], a, kat-button, [role="button"]'))
+    .find(b => {
+      const text = (b.textContent || '') + ' ' + (b.value || '') + ' ' + (b.getAttribute('label') || '') + ' ' + (b.getAttribute('aria-label') || '');
+      return /select account/i.test(text);
+    });
 
   if (selectBtn) {
     console.log('[SC Brand Switcher] Clicking \'Select account\' button');
     selectBtn.click();
+    
+    // Fallback: dispatch a native event just in case .click() doesn't bubble correctly on Katal elements
+    selectBtn.dispatchEvent(new Event('click', { bubbles: true, composed: true }));
+  } else {
+    console.warn('[SC Brand Switcher] Could not find the "Select account" button.');
   }
 }
 
