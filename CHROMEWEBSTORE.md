@@ -170,7 +170,8 @@ CONTACT: [YOUR EMAIL]
 
 | Version | Date | Changes | Status |
 |---------|------|---------|--------|
-| 1.2.0 | 2026-08-20 | Replaced raw marketplace domains with "Supports all 20 Amazon marketplaces worldwide" in description to fix CWS Keyword Spam rejection. | Draft |
+| 1.2.1 | 2026-08-21 | Fix for auto-confirming on Amazon's new nested account switcher UI. | Draft |
+| 1.2.0 | 2026-08-20 | Replaced raw marketplace domains with "Supports all 20 Amazon marketplaces worldwide" in description to fix CWS Keyword Spam rejection. | Pending Review |
 | 1.2.0 | 2026-08-13 | Stay-on-page toggle, auto-confirm account switcher, cross-table DnD, icons added | Rejected (Keyword Spam) |
 
 ---
@@ -181,7 +182,7 @@ Run from the parent directory:
 
 ```bash
 cd ~/your-projects-folder
-zip -r seller-central-brand-switcher-v1.2.0.zip amazon-client-switcher/ \
+zip -r seller-central-brand-switcher-v1.2.1.zip amazon-client-switcher/ \
   --exclude "amazon-client-switcher/.git/*" \
   --exclude "amazon-client-switcher/generate_icons.py" \
   --exclude "amazon-client-switcher/CHROMEWEBSTORE.md" \

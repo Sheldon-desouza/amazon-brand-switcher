@@ -112,7 +112,6 @@ async function autoConfirmAccountSwitcher() {
   );
   const pending = data.scBrandSwitcherPending;
 
-  // Ignore stale entries (older than 30 seconds)
   if (!pending || Date.now() - pending.ts > 30000) {
     chrome.storage.local.remove(['scBrandSwitcherPending']);
     return;
@@ -121,77 +120,116 @@ async function autoConfirmAccountSwitcher() {
   chrome.storage.local.remove(['scBrandSwitcherPending']);
   console.log('[SC Brand Switcher] Auto-confirming account switcher for:', pending.brandName);
 
-  // Wait for the account list to render
-  await new Promise(r => setTimeout(r, 1200));
+  // Wait for the Katal/React tree to fully render
+  await new Promise(r => setTimeout(r, 1500));
 
-  // Parse brand + marketplace from stored name e.g. "V12 Footwear | United Kingdom"
-  const parts = pending.brandName.split('|');
-  const brandSearch       = parts[0].trim().toLowerCase();
-  const marketplaceSearch = (parts[1] || '').trim().toLowerCase();
+  const parts          = pending.brandName.split('|');
+  const brandName      = parts[0].trim();           // e.g. "V12 Footwear"
+  const marketplaceName = (parts[1] || '').trim();  // e.g. "United Kingdom"
+  const brandSearch    = brandName.toLowerCase();
+  const marketplaceSearch = marketplaceName.toLowerCase();
 
-  // Collect all leaf elements that contain text
-  const candidates = Array.from(document.querySelectorAll('div, span, a, label, li, button')).filter(el => {
-    return el.children.length === 0 && el.textContent.trim().length > 0;
-  });
-
-  let bestMatch = null;
-  let bestScore = -1;
-
-  for (const el of candidates) {
-    const text = el.textContent.trim().toLowerCase();
-    let score = 0;
-    
-    if (marketplaceSearch) {
-      if (text === marketplaceSearch) score += 10;
-      else if (text.includes(marketplaceSearch)) score += 5;
-    } else if (brandSearch) {
-      if (text === brandSearch) score += 10;
-      else if (text.includes(brandSearch)) score += 5;
-    }
-
-    // Check if a nearby parent container includes the brand name to disambiguate
-    const parentContainer = el.closest('li, [role="row"], [role="group"], ul, .a-box');
-    if (parentContainer) {
-      const parentText = parentContainer.textContent.toLowerCase();
-      if (brandSearch && parentText.includes(brandSearch)) {
-        score += 2;
+  // ---- Helper: find parent elements of text nodes matching a search term ----
+  // Using TreeWalker scans ALL text nodes regardless of element type,
+  // including Amazon Katal custom elements (kat-text, kat-label, etc.)
+  function findByText(searchText, maxLength = 80) {
+    const results = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      const t = node.textContent.trim().toLowerCase();
+      if (t.includes(searchText) && node.textContent.trim().length < maxLength) {
+        const el = node.parentElement;
+        if (el && !results.includes(el)) results.push(el);
       }
     }
+    return results;
+  }
 
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = el;
+  // ---- Step 0: Type brand name into the search box to filter the list ----
+  // The account switcher has a "Search for an account" input — using it narrows
+  // the list to just the target brand before we try to click anything.
+  const searchInput = document.querySelector(
+    'input[placeholder*="Search"], input[placeholder*="search"], ' +
+    'input[type="search"], kat-input input, input[class*="search"]'
+  );
+  if (searchInput) {
+    console.log('[SC Brand Switcher] Typing into search box:', brandName);
+    // Use native value setter so React/Katal controlled inputs pick up the change
+    const nativeSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype, 'value'
+    ).set;
+    nativeSetter.call(searchInput, brandName);
+    ['input', 'change', 'keyup'].forEach(evt =>
+      searchInput.dispatchEvent(new Event(evt, { bubbles: true }))
+    );
+    await new Promise(r => setTimeout(r, 1000)); // wait for list to filter
+  } else {
+    console.log('[SC Brand Switcher] No search box found, proceeding without filtering.');
+  }
+
+  // ---- Step 1: Expand the brand row (Agency → Brand → Marketplace tree) ----
+  if (brandSearch) {
+    const brandEls = findByText(brandSearch).filter(el => {
+      const t = el.textContent.trim().toLowerCase();
+      return t === brandSearch || t.startsWith(brandSearch);
+    });
+
+    if (brandEls.length > 0) {
+      const brandClickable = brandEls[0].closest(
+        'li, [role="treeitem"], [role="row"], [role="option"], button, a, label'
+      ) || brandEls[0];
+      console.log('[SC Brand Switcher] Expanding brand row:', brandClickable.textContent.trim().slice(0, 60));
+      brandClickable.click();
+      await new Promise(r => setTimeout(r, 800));
+    } else {
+      console.warn('[SC Brand Switcher] Brand row not found in tree for:', brandSearch);
     }
   }
 
-  if (bestMatch && bestScore > 0) {
-    // Find the closest clickable container (radio button, list item, label, or the element itself)
-    const clickable = bestMatch.closest('input[type="radio"], [role="radio"], li, label, button, a') || bestMatch;
-    console.log('[SC Brand Switcher] Auto-clicking account element:', clickable);
+  // ---- Step 2: Click the marketplace leaf (e.g. "United Kingdom") ----
+  const target = marketplaceSearch || brandSearch;
+  const mpEls  = findByText(target);
+
+  let clicked = false;
+  for (const el of mpEls) {
+    const t = el.textContent.trim().toLowerCase();
+    if (!t.includes(target)) continue;
+
+    const clickable = el.closest(
+      'input[type="radio"], [role="radio"], [role="option"], [role="treeitem"], li, label, button, a'
+    ) || el;
+    console.log('[SC Brand Switcher] Clicking marketplace element:', clickable.textContent.trim().slice(0, 60));
     clickable.click();
-    await new Promise(r => setTimeout(r, 800)); // wait for React state update to enable button
-  } else {
-    console.warn('[SC Brand Switcher] No account match found — user must select manually.');
-    return; // Don’t blindly click "Select account" if we didn’t match anything
+    clicked = true;
+    await new Promise(r => setTimeout(r, 800));
+    break;
   }
 
-  // Click the "Select account" button
-  const selectBtn = Array.from(document.querySelectorAll('button, input[type="submit"], a, kat-button, [role="button"]'))
-    .find(b => {
-      const text = (b.textContent || '') + ' ' + (b.value || '') + ' ' + (b.getAttribute('label') || '') + ' ' + (b.getAttribute('aria-label') || '');
-      return /select account/i.test(text);
-    });
+  if (!clicked) {
+    console.warn('[SC Brand Switcher] No account match found — user must select manually.');
+    return;
+  }
+
+  // ---- Step 3: Click "Select account" button ----
+  const selectBtn = Array.from(
+    document.querySelectorAll('button, input[type="submit"], a, kat-button, [role="button"]')
+  ).find(b => {
+    const text = (b.textContent || '') + ' ' + (b.value || '') +
+                 ' ' + (b.getAttribute('label') || '') +
+                 ' ' + (b.getAttribute('aria-label') || '');
+    return /select account/i.test(text);
+  });
 
   if (selectBtn) {
-    console.log('[SC Brand Switcher] Clicking \'Select account\' button');
+    console.log('[SC Brand Switcher] Clicking "Select account"');
     selectBtn.click();
-    
-    // Fallback: dispatch a native event just in case .click() doesn't bubble correctly on Katal elements
     selectBtn.dispatchEvent(new Event('click', { bubbles: true, composed: true }));
   } else {
     console.warn('[SC Brand Switcher] Could not find the "Select account" button.');
   }
 }
+
 
 
 async function switchClient(clientConfig) {
@@ -205,19 +243,39 @@ async function switchClient(clientConfig) {
 
       const currentUrl = new URL(window.location.href);
 
-      // Resolve the target domain from the stored marketplaceId
-      const targetHost = clientConfig.marketplaceId
-        ? MARKETPLACE_DOMAINS[clientConfig.marketplaceId]
-        : null;
+      // Normalise marketplaceId — strip 'amzn1.mp.o.' prefix that agency SC accounts emit
+      // e.g. 'amzn1.mp.o.A1F83G8C2ARO7P' → 'A1F83G8C2ARO7P'
+      const rawMpId  = clientConfig.marketplaceId || '';
+      const normMpId = rawMpId.startsWith('amzn1.mp.o.')
+        ? rawMpId.slice('amzn1.mp.o.'.length)
+        : rawMpId;
+      const targetHost = MARKETPLACE_DOMAINS[normMpId] || null;
+
+      // Avoid using Amazon's own internal/registration paths as the returnTo destination.
+      // These pages appear when a brand is 'pending registration' and should never be
+      // used as the switch target — fall back to /home instead.
+      const BAD_PATH_PREFIXES = [
+        '/mario/rfb/',
+        '/account-switcher/',
+        '/signupV3/',
+        '/orbis-agreements/',
+        '/registration/',
+        '/gp/seller-registration/',
+      ];
+      const isOnBadPath = BAD_PATH_PREFIXES.some(p => currentUrl.pathname.startsWith(p) || currentUrl.pathname.includes(p));
+      const safePath = isOnBadPath ? '/home' : (currentUrl.pathname + currentUrl.search);
+      if (isOnBadPath) {
+        console.log('[SC Brand Switcher] Current path is a registration/internal page — redirecting to /home instead.');
+      }
 
       let url;
       if (stayOnPage && targetHost) {
-        // Stay on the equivalent page — switch domain, keep path + search
-        url = new URL(currentUrl.pathname + currentUrl.search, `https://${targetHost}`);
+        // Stay on the equivalent page on the target marketplace domain
+        url = new URL(safePath, `https://${targetHost}`);
         console.log(`[SC Brand Switcher] Stay-on-page mode: switching domain to ${targetHost}`);
       } else {
-        // Legacy behaviour: use current domain (Amazon will redirect to home on the new account)
-        url = new URL(currentUrl.pathname + currentUrl.search, currentUrl.origin);
+        // Use current domain — Amazon will redirect to the brand home
+        url = new URL(safePath, currentUrl.origin);
         console.log(`[SC Brand Switcher] Home-page mode: staying on current domain`);
       }
 
@@ -231,8 +289,8 @@ async function switchClient(clientConfig) {
         url.searchParams.set('mons_sel_dir_mcid', 'amzn1.merchant.d.' + clientConfig.merchantId);
       }
 
-      if (clientConfig.marketplaceId) {
-        url.searchParams.set('mons_sel_mkid', clientConfig.marketplaceId);
+      if (normMpId) {
+        url.searchParams.set('mons_sel_mkid', normMpId);
       }
 
       console.log('[SC Brand Switcher] Navigating via URL params to:', url.toString());
